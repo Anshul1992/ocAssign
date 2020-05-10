@@ -12,6 +12,41 @@ from pyspark.sql.functions import col
 import json
 from fuzzywuzzy import fuzz
 
+def solution1(spark):
+    """
+    :param spark:
+    :type spark:
+    :return:
+    :rtype:
+    """
+    # schema = StructType([
+    #     StructField('id',IntegerType(),True),
+    #     StructField('event_name', StringType(), True),
+    #     StructField('people_count', IntegerType(), True),
+    # ])
+    # df = spark.read.format('csv').options(header='true').schema(schema).load("/Users/anshgoel/Desktop/oneChampionshipAssignment/Input/event.csv")
+
+
+    df = spark.read.format('csv').options(inferschema="true",header='true').load(
+        "/Users/anshgoel/Desktop/ocAssign/Input/event.csv")
+    df.show()
+    df.printSchema()
+
+    df.createOrReplaceTempView('sql')
+
+    df_final = spark.sql("""SELECT DISTINCT series1.*
+                    FROM sql series1
+                    cross JOIN sql series2
+                    cross JOIN sql series3
+                    ON ((series1.id = series2.id - 1 AND series1.id = series3.id -2)
+                    OR (series3.id = series1.id - 1 AND series3.id = series2.id -2)
+                    OR (series3.id = series2.id - 1 AND series3.id = series1.id -2))
+                    WHERE series1.people_count >= 100
+                    AND series2.people_count >= 100
+                    AND series3.people_count >= 100""")
+
+    df_final.coalesce(1).write.mode('overwrite').csv("/Users/anshgoel/Desktop/ocAssign/Output/solution1.csv")
+
 def solution2(spark):
     """
     :param spark:
@@ -48,7 +83,7 @@ def solution2(spark):
     df.printSchema()
     # df.where(col('datetime')=='10/1/15 8:02').show()
 
-    df.write.mode('overwrite').json("/Users/anshgoel/Desktop/ocAssign/Output/question2.json")
+    df.write.mode('overwrite').json("/Users/anshgoel/Desktop/ocAssign/Output/solution2.json")
 
     # df = spark.read.format('csv').options(header='true', inferSchema='true').load("/Users/anshgoel/Desktop/ocAssign/Input/data.csv")
     # df.show()
@@ -86,4 +121,5 @@ def solution2(spark):
 
 if __name__ == "__main__":
     spark = SparkSession.builder.appName("ocAssign").getOrCreate()
+    solution1(spark)
     solution2(spark)
