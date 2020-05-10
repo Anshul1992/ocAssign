@@ -1,0 +1,4 @@
+fuzzywuzzy==0.18.0
+py4j==0.10.7
+pyspark==2.4.5
+python-Levenshtein==0.12.0
