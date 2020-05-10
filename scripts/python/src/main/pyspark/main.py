@@ -12,6 +12,12 @@ from pyspark.sql.functions import col
 import json
 from fuzzywuzzy import fuzz
 
+event_path = '/Users/anshgoel/Desktop/ocAssign/Input/event.csv'
+schema_path = '/Users/anshgoel/Desktop/ocAssign/Input/schema.json'
+data_path = '/Users/anshgoel/Desktop/ocAssign/Input/data.csv'
+sol1_output = 'Users/anshgoel/Desktop/ocAssign/Output/solution1.csv'
+sol2_output = '/Users/anshgoel/Desktop/ocAssign/Output/solution2.json'
+
 def solution1(spark):
     """
     :param spark:
@@ -27,8 +33,7 @@ def solution1(spark):
     # df = spark.read.format('csv').options(header='true').schema(schema).load("/Users/anshgoel/Desktop/oneChampionshipAssignment/Input/event.csv")
 
 
-    df = spark.read.format('csv').options(inferschema="true",header='true').load(
-        "/Users/anshgoel/Desktop/ocAssign/Input/event.csv")
+    df = spark.read.format('csv').options(inferschema="true",header='true').load(event_path)
     df.show()
     df.printSchema()
 
@@ -45,7 +50,7 @@ def solution1(spark):
                     AND series2.people_count >= 100
                     AND series3.people_count >= 100""")
 
-    df_final.coalesce(1).write.mode('overwrite').csv("/Users/anshgoel/Desktop/ocAssign/Output/solution1.csv")
+    df_final.coalesce(1).write.mode('overwrite').csv(sol1_output)
 
 def solution2(spark):
     """
@@ -54,7 +59,7 @@ def solution2(spark):
     :return:
     :rtype:
     """
-    config = json.loads(open("/Users/anshgoel/Desktop/ocAssign/Input/schema.json").read())
+    config = json.loads(open(schema_path).read())
     print(config)
     cr_schema = []
     properties = config['properties']
@@ -77,13 +82,12 @@ def solution2(spark):
     schema = StructType(cr_schema_rep)
     print(schema)
 
-    df = spark.read.format('csv').options(header='true').schema(schema).load(
-        "/Users/anshgoel/Desktop/ocAssign/Input/data.csv")
+    df = spark.read.format('csv').options(header='true').schema(schema).load(data_path)
     df.show()
     df.printSchema()
     # df.where(col('datetime')=='10/1/15 8:02').show()
 
-    df.write.mode('overwrite').json("/Users/anshgoel/Desktop/ocAssign/Output/solution2.json")
+    df.write.mode('overwrite').json(sol2_output)
 
     # df = spark.read.format('csv').options(header='true', inferSchema='true').load("/Users/anshgoel/Desktop/ocAssign/Input/data.csv")
     # df.show()
